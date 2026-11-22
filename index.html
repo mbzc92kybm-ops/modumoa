@@ -81,9 +81,14 @@ main.wrap { display: flex; flex-direction: column; gap: 16px; padding-top: 16px;
   background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
 }
 .item {
-  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto;
+  display: grid; grid-template-columns: 40px 76px minmax(0, 1fr) auto;
   align-items: center; gap: 12px; padding: 14px;
 }
+.thumb {
+  width: 76px; height: 76px; border-radius: 12px; overflow: hidden;
+  background: #FFFFFF; border: 1px solid var(--line);
+}
+.thumb img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .item + .item { border-top: 1px solid var(--line); }
 .no {
   font-family: var(--font-display); font-size: 32px; line-height: 1;
@@ -109,8 +114,10 @@ main.wrap { display: flex; flex-direction: column; gap: 16px; padding-top: 16px;
   background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; color: var(--muted);
 }
 @media (max-width: 440px) {
-  .item { grid-template-columns: 44px minmax(0, 1fr); }
-  .go, .wait { grid-column: 2; justify-self: start; }
+  .item { grid-template-columns: 30px 68px minmax(0, 1fr); column-gap: 10px; row-gap: 8px; }
+  .no, .thumb { grid-row: 1 / span 2; }
+  .thumb { width: 68px; height: 68px; }
+  .go, .wait { grid-column: 3; justify-self: start; }
   .no { font-size: 28px; }
 }
 </style>
@@ -147,13 +154,13 @@ main.wrap { display: flex; flex-direction: column; gap: 16px; padding-top: 16px;
 </main>
 
 <script>
-// 제품 목록: 새 제품은 맨 위에 한 줄 추가. url이 비어 있으면 "링크 준비 중"으로 표시됩니다.
+// 제품 목록: 새 제품은 맨 위에 한 줄 추가. url이 비어 있으면 "링크 준비 중"으로 표시됩니다. img는 img 폴더의 사진 파일.
 var PRODUCTS = [
-  { no: 5, name: "파티션 발난로", note: "책상 밑을 3면으로 둘러싸는 형태 · 무릎담요 포함", url: "https://link.coupang.com/a/iQYgcBojU4" },
-  { no: 4, name: "충전식 손난로", note: "보조배터리 겸용 5000mAh", url: "https://link.coupang.com/a/iQYc7iHsLQ" },
-  { no: 3, name: "초음파 가습기 4L", note: "위에서 붓는 급수 방식", url: "https://link.coupang.com/a/iQX74er62m" },
-  { no: 2, name: "전기요", note: "온도 단계 조절 · 타이머", url: "https://link.coupang.com/a/iQYnv6Xry0" },
-  { no: 1, name: "2단 전기히터", note: "위아래를 따로 켜고 끄는 스탠드형", url: "https://link.coupang.com/a/iQXXw5adsi" }
+  { no: 5, img: "img/5.jpg", name: "파티션 발난로", note: "책상 밑을 3면으로 둘러싸는 형태 · 무릎담요 포함", url: "https://link.coupang.com/a/iQYgcBojU4" },
+  { no: 4, img: "img/4.jpg", name: "충전식 손난로", note: "보조배터리 겸용 5000mAh", url: "https://link.coupang.com/a/iQYc7iHsLQ" },
+  { no: 3, img: "img/3.jpg", name: "초음파 가습기 4L", note: "위에서 붓는 급수 방식", url: "https://link.coupang.com/a/iQX74er62m" },
+  { no: 2, img: "img/2.jpg", name: "전기요", note: "온도 단계 조절 · 타이머", url: "https://link.coupang.com/a/iQYnv6Xry0" },
+  { no: 1, img: "img/1.jpg", name: "2단 전기히터", note: "위아래를 따로 켜고 끄는 스탠드형", url: "https://link.coupang.com/a/iQXXw5adsi" }
 ];
 
 var listEl = document.getElementById("list");
@@ -189,6 +196,18 @@ function render() {
   found.forEach(function (p) {
     var li = el("li", "item");
     li.appendChild(el("span", "no", String(p.no)));
+
+    var thumb = el("div", "thumb");
+    if (p.img) {
+      var pic = el("img");
+      pic.src = p.img;
+      pic.alt = "";
+      pic.width = 360;
+      pic.height = 360;
+      pic.loading = "lazy";
+      thumb.appendChild(pic);
+    }
+    li.appendChild(thumb);
 
     var body = el("div", "body");
     var name = el("p", "name", p.name);
