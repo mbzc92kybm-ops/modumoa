@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모두모아 제품 목록</title>
+<meta name="description" content="모두모아 영상에 나온 번호로 제품을 찾는 페이지">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600&display=swap">
+<style>
+/* Layout idea: yellow brand band on top, then one narrow left-aligned column: notice, search, numbered rows. */
+:root {
+  --bg: #F4F5F9;
+  --surface: #FFFFFF;
+  --text: #15171C;
+  --muted: #586074;
+  --line: #E1E4EC;
+  --chip: #EEF0F6;
+  --brand: #FFD23F;
+  --brand-ink: #15171C;
+  --action: #2340E8;
+  --action-text: #FFFFFF;
+  --font-display: 'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --font-body: 'IBM Plex Sans KR', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101218;
+    --surface: #1A1D25;
+    --text: #F1F2F6;
+    --muted: #A3A9B8;
+    --line: #2B2F3A;
+    --chip: #252935;
+    --action: #3D5BFF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101218;
+  --surface: #1A1D25;
+  --text: #F1F2F6;
+  --muted: #A3A9B8;
+  --line: #2B2F3A;
+  --chip: #252935;
+  --action: #3D5BFF;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+.top { background: var(--brand); color: var(--brand-ink); }
+.top-in { display: flex; align-items: center; gap: 12px; padding-top: 20px; padding-bottom: 20px; }
+.logo { width: 56px; height: 56px; flex: none; }
+.top h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 30px; line-height: 1.1; }
+.top p { margin: 4px 0 0; font-size: 14px; }
+main.wrap { display: flex; flex-direction: column; gap: 16px; padding-top: 16px; padding-bottom: 48px; }
+.disclosure {
+  margin: 0; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); color: var(--muted); font-size: 13px;
+}
+.search { display: flex; flex-direction: column; gap: 6px; }
+.search label { font-size: 14px; font-weight: 600; }
+.search input {
+  width: 100%; height: 48px; padding: 0 14px;
+  border: 2px solid var(--line); border-radius: 12px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: 16px;
+}
+.search input:focus-visible { outline: 3px solid var(--action); outline-offset: 1px; border-color: var(--action); }
+.count { margin: 0; font-size: 13px; color: var(--muted); }
+.list {
+  list-style: none; margin: 0; padding: 0;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+}
+.item {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center; gap: 12px; padding: 14px;
+}
+.item + .item { border-top: 1px solid var(--line); }
+.no {
+  font-family: var(--font-display); font-size: 32px; line-height: 1;
+  font-variant-numeric: tabular-nums; text-align: center;
+}
+.name { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.note { margin: 2px 0 0; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.chip {
+  display: inline-block; margin-left: 6px; padding: 1px 7px;
+  border-radius: 999px; background: var(--chip); color: var(--muted);
+  font-size: 12px; font-weight: 400; vertical-align: 2px;
+}
+.go, .wait {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 16px; border-radius: 999px;
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.go { background: var(--action); color: var(--action-text); text-decoration: none; }
+.go:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.wait { background: var(--chip); color: var(--muted); font-weight: 400; }
+.empty {
+  margin: 0; padding: 24px 16px; text-align: center;
+  background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; color: var(--muted);
+}
+@media (max-width: 440px) {
+  .item { grid-template-columns: 44px minmax(0, 1fr); }
+  .go, .wait { grid-column: 2; justify-self: start; }
+  .no { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <svg class="logo" viewBox="20 20 68 68" role="img" aria-label="모두모아 로고">
+      <rect x="35.2" y="30.5" width="37.6" height="30.6" rx="2" fill="#FFFFFF" stroke="#15171C" stroke-width="6.4"></rect>
+      <circle cx="45.2" cy="51.5" r="5" fill="#2340E8"></circle>
+      <rect x="51.6" y="47.7" width="8.8" height="8.8" rx="2" fill="#FF5A3C"></rect>
+      <circle cx="64.8" cy="53.5" r="3" fill="#15171C"></circle>
+      <rect x="50.8" y="64.3" width="6.4" height="9.8" fill="#15171C"></rect>
+      <rect x="24" y="73.9" width="60" height="6.4" rx="3.2" fill="#15171C"></rect>
+    </svg>
+    <div>
+      <h1>모두모아</h1>
+      <p>영상에 나온 번호로 제품을 찾으세요</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="disclosure">이 페이지는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+
+  <div class="search">
+    <label for="q">번호 또는 제품명으로 찾기</label>
+    <input id="q" type="search" inputmode="search" autocomplete="off" placeholder="예: 3">
+  </div>
+
+  <p class="count" id="count" aria-live="polite"></p>
+  <ol class="list" id="list"></ol>
+  <p class="empty" id="empty" hidden></p>
+</main>
+
+<script>
+// 제품 목록: 새 제품은 맨 위에 한 줄 추가. url이 비어 있으면 "링크 준비 중"으로 표시됩니다.
+var PRODUCTS = [
+  { no: 5, name: "파티션 발난로", note: "책상 밑을 3면으로 둘러싸는 형태 · 무릎담요 포함", url: "https://link.coupang.com/a/iQYgcBojU4" },
+  { no: 4, name: "충전식 손난로", note: "보조배터리 겸용 5000mAh", url: "https://link.coupang.com/a/iQYc7iHsLQ" },
+  { no: 3, name: "초음파 가습기 4L", note: "위에서 붓는 급수 방식", url: "https://link.coupang.com/a/iQX74er62m" },
+  { no: 2, name: "전기요", note: "온도 단계 조절 · 타이머", url: "https://link.coupang.com/a/iQYnv6Xry0" },
+  { no: 1, name: "2단 전기히터", note: "위아래를 따로 켜고 끄는 스탠드형", url: "https://link.coupang.com/a/iQXXw5adsi" }
+];
+
+var listEl = document.getElementById("list");
+var emptyEl = document.getElementById("empty");
+var countEl = document.getElementById("count");
+var inputEl = document.getElementById("q");
+
+function el(tag, cls, text) {
+  var node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function matches(query) {
+  var sorted = PRODUCTS.slice().sort(function (a, b) { return b.no - a.no; });
+  if (!query) return sorted;
+  if (/^\d+$/.test(query)) {
+    var n = parseInt(query, 10);
+    return sorted.filter(function (p) { return p.no === n; });
+  }
+  var lower = query.toLowerCase();
+  return sorted.filter(function (p) {
+    return (p.name + " " + (p.note || "")).toLowerCase().indexOf(lower) !== -1;
+  });
+}
+
+function render() {
+  var query = inputEl.value.trim();
+  var found = matches(query);
+  listEl.textContent = "";
+
+  found.forEach(function (p) {
+    var li = el("li", "item");
+    li.appendChild(el("span", "no", String(p.no)));
+
+    var body = el("div", "body");
+    var name = el("p", "name", p.name);
+    if (p.sample) name.appendChild(el("span", "chip", "예시"));
+    body.appendChild(name);
+    if (p.note) body.appendChild(el("p", "note", p.note));
+    li.appendChild(body);
+
+    if (p.url) {
+      var a = el("a", "go", "쿠팡에서 보기");
+      a.href = p.url;
+      a.target = "_blank";
+      a.rel = "noopener sponsored";
+      a.setAttribute("aria-label", p.no + "번 " + p.name + " 쿠팡에서 보기");
+      li.appendChild(a);
+    } else {
+      li.appendChild(el("span", "wait", "링크 준비 중"));
+    }
+    listEl.appendChild(li);
+  });
+
+  var none = found.length === 0;
+  listEl.hidden = none;
+  emptyEl.hidden = !none;
+  if (none) {
+    emptyEl.textContent = /^\d+$/.test(query)
+      ? query + "번 제품은 아직 없어요. 번호를 다시 확인해 주세요."
+      : "찾는 제품이 없어요. 다른 단어로 검색해 보세요.";
+  }
+  countEl.textContent = query ? found.length + "개 찾음" : "전체 " + found.length + "개 · 최신순";
+}
+
+inputEl.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
